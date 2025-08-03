@@ -1,6 +1,8 @@
-# Vercel RAG Configurator
+# RAG Configurator
 
 A sophisticated web application that enables developers to design, configure, evaluate, and export Retrieval-Augmented Generation (RAG) pipelines through an intuitive visual interface.
+<img width="1582" height="1144" alt="Screenshot 2025-08-03 at 10 06 26 AM" src="https://github.com/user-attachments/assets/c25506d7-9e99-4911-8107-9e26ec7cf166" />
+
 
 ## Features
 
