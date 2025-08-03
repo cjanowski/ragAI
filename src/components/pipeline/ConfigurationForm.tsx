@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { ComponentOption, Parameter } from '@/types';
-import { AlertCircle, CheckCircle, Info } from 'lucide-react';
+import { AlertCircle, CheckCircle, Info, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ConfigurationFormProps {
@@ -269,35 +269,40 @@ export function ConfigurationForm({
   };
 
   return (
-    <div className={cn("space-y-4", className)}>
+    <div className={cn("space-y-6", className)}>
       <div className="flex items-center justify-between">
-        <h4 className="font-medium text-sm">Configuration</h4>
+        <div className="flex items-center gap-3">
+          <div className="w-6 h-6 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center">
+            <Settings className="h-3 w-3 text-white" />
+          </div>
+          <h4 className="font-bold text-lg text-gray-900">Configuration</h4>
+        </div>
         <div className="flex items-center gap-2">
           {isValid ? (
-            <div className="flex items-center gap-1 text-green-600">
-              <CheckCircle className="h-3 w-3" />
-              <span className="text-xs">Valid</span>
+            <div className="flex items-center gap-2 bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full">
+              <CheckCircle className="h-4 w-4" />
+              <span className="text-sm font-semibold">Valid</span>
             </div>
           ) : (
-            <div className="flex items-center gap-1 text-red-600">
-              <AlertCircle className="h-3 w-3" />
-              <span className="text-xs">Invalid</span>
+            <div className="flex items-center gap-2 bg-red-100 text-red-700 px-3 py-1 rounded-full">
+              <AlertCircle className="h-4 w-4" />
+              <span className="text-sm font-semibold">Invalid</span>
             </div>
           )}
         </div>
       </div>
 
-      <form className="space-y-4">
+      <form className="space-y-6">
         {component.parameters.map((param) => (
-          <div key={param.name} className="space-y-2">
+          <div key={param.name} className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-white/40 space-y-3">
             <div className="flex items-center justify-between">
-              <Label htmlFor={param.name} className="text-sm font-medium">
+              <Label htmlFor={param.name} className="text-sm font-bold text-gray-900">
                 {param.name}
                 {param.required && <span className="text-red-500 ml-1">*</span>}
               </Label>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-2">
                 {param.defaultValue !== undefined && (
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant="outline" className="text-xs bg-gray-50 border-gray-200 font-medium">
                     Default: {param.defaultValue.toString()}
                   </Badge>
                 )}
@@ -307,16 +312,16 @@ export function ConfigurationForm({
             {renderParameterInput(param)}
             
             {/* Parameter description */}
-            <div className="flex items-start gap-2 text-xs text-gray-500">
-              <Info className="h-3 w-3 mt-0.5 flex-shrink-0" />
-              <span>{getParameterDescription(param)}</span>
+            <div className="flex items-start gap-3 text-sm text-gray-600 bg-blue-50/50 p-3 rounded-lg border border-blue-100">
+              <Info className="h-4 w-4 mt-0.5 flex-shrink-0 text-blue-600" />
+              <span className="leading-relaxed">{getParameterDescription(param)}</span>
             </div>
             
             {/* Validation error */}
             {errors[param.name] && (
-              <div className="flex items-center gap-1 text-red-600 text-xs">
-                <AlertCircle className="h-3 w-3" />
-                <span>{errors[param.name]?.message?.toString()}</span>
+              <div className="flex items-center gap-2 text-red-700 text-sm bg-red-50 p-2 rounded-lg border border-red-200">
+                <AlertCircle className="h-4 w-4" />
+                <span className="font-medium">{errors[param.name]?.message?.toString()}</span>
               </div>
             )}
             
@@ -336,8 +341,12 @@ export function ConfigurationForm({
       </form>
       
       {component.parameters.length === 0 && (
-        <div className="text-center py-4 text-gray-500 text-sm">
-          No configuration required for this component
+        <div className="text-center py-8 bg-white/60 backdrop-blur-sm rounded-xl border border-white/40">
+          <div className="w-12 h-12 mx-auto mb-3 bg-gradient-to-br from-green-100 to-emerald-100 rounded-full flex items-center justify-center">
+            <CheckCircle className="h-6 w-6 text-emerald-600" />
+          </div>
+          <p className="text-gray-600 font-medium">No configuration required</p>
+          <p className="text-sm text-gray-500 mt-1">This component works out of the box</p>
         </div>
       )}
     </div>

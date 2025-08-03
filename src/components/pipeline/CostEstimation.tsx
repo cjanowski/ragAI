@@ -81,21 +81,21 @@ export function CostEstimation({
           <Badge 
             variant="outline" 
             className={cn(
-              "cursor-pointer hover:shadow-sm transition-all",
+              "cursor-pointer hover:shadow-md transition-all duration-200 font-semibold px-3 py-1.5 text-sm",
               costColor,
               className
             )}
           >
-            <DollarSign className="h-3 w-3 mr-1" />
-            {formatCurrency(monthlyCost.total)}/mo
+            <DollarSign className="h-3 w-3 mr-1.5" />
+            ${formatCurrency(monthlyCost.total)}/mo
           </Badge>
         </PopoverTrigger>
-        <PopoverContent className="w-80 p-0" align="start">
+        <PopoverContent className="w-96 p-0 bg-white/95 backdrop-blur-sm border-gray-200 shadow-xl" align="start">
           <CostEstimation 
             cost={cost} 
             usage={usage} 
             showDetails={true}
-            className="p-4"
+            className="p-6"
           />
         </PopoverContent>
       </Popover>
@@ -104,9 +104,11 @@ export function CostEstimation({
 
   return (
     <div className={cn("space-y-4", className)}>
-      <div className="flex items-center gap-2">
-        <Calculator className="h-4 w-4 text-gray-600" />
-        <h4 className="font-medium text-sm">Cost Estimation</h4>
+      <div className="flex items-center gap-3 mb-2">
+        <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+          <Calculator className="h-4 w-4 text-white" />
+        </div>
+        <h4 className="font-bold text-lg text-gray-900">Cost Breakdown</h4>
       </div>
 
       {/* Cost Breakdown */}
@@ -163,14 +165,16 @@ export function CostEstimation({
 
         {/* Total Cost */}
         <div className={cn(
-          "flex items-center justify-between py-3 px-3 rounded-lg border-2",
+          "flex items-center justify-between py-4 px-4 rounded-xl border-2 bg-gradient-to-r from-white to-gray-50",
           costColor
         )}>
-          <div className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4" />
-            <span className="font-medium">Total Monthly Cost</span>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+              <TrendingUp className="h-4 w-4 text-white" />
+            </div>
+            <span className="font-bold text-lg text-gray-900">Total Monthly Cost</span>
           </div>
-          <span className="font-bold text-lg">{formatCurrency(monthlyCost.total)}</span>
+          <span className="font-bold text-2xl text-gray-900">${formatCurrency(monthlyCost.total)}</span>
         </div>
       </div>
 

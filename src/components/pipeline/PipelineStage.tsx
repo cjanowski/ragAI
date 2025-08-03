@@ -95,24 +95,41 @@ export function PipelineStage({
       {...listeners}
     >
       <Card className={cn(
-        "w-full min-h-[200px] transition-all duration-200",
-        stage.component ? "border-green-200 bg-green-50/50" : "border-dashed border-gray-300",
-        isOver && "border-blue-500 bg-blue-50/50",
-        !stage.validation.isValid && "border-red-200 bg-red-50/50"
+        "w-full min-h-[280px] transition-all duration-300 hover:shadow-lg group relative overflow-hidden",
+        stage.component 
+          ? "border-emerald-200 bg-gradient-to-br from-emerald-50 to-green-50 shadow-sm" 
+          : "border-dashed border-gray-300 bg-white hover:border-gray-400",
+        isOver && "border-blue-400 bg-gradient-to-br from-blue-50 to-indigo-50 shadow-md scale-[1.02]",
+        !stage.validation.isValid && stage.component && "border-red-200 bg-gradient-to-br from-red-50 to-pink-50"
       )}>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg font-semibold flex items-center gap-2">
-              {stage.name}
-              {getValidationIcon(stage.validation)}
-            </CardTitle>
+        <CardHeader className="pb-4 relative">
+          {/* Stage number indicator */}
+          <div className="absolute -top-2 -left-2 w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg">
+            {['ingestion', 'chunking', 'embedding', 'vectorstore', 'retrieval', 'generation'].indexOf(stage.id) + 1}
+          </div>
+          
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <CardTitle className="text-xl font-bold flex items-center gap-3 text-gray-900 mb-1">
+                {stage.name}
+                {getValidationIcon(stage.validation)}
+              </CardTitle>
+              <p className="text-sm text-gray-500 font-medium">
+                {stage.id === 'ingestion' && 'Load and preprocess documents'}
+                {stage.id === 'chunking' && 'Split text into manageable pieces'}
+                {stage.id === 'embedding' && 'Convert text to vectors'}
+                {stage.id === 'vectorstore' && 'Store and index embeddings'}
+                {stage.id === 'retrieval' && 'Find relevant context'}
+                {stage.id === 'generation' && 'Generate AI responses'}
+              </p>
+            </div>
             <div className="flex items-center gap-2">
               {stage.component && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => onToggleConfiguration(stage.id)}
-                  className="h-8 w-8 p-0"
+                  className="h-9 w-9 p-0 hover:bg-white/80 transition-colors"
                 >
                   <Settings className="h-4 w-4" />
                 </Button>
@@ -141,9 +158,12 @@ export function PipelineStage({
 
         <CardContent className="space-y-4">
           {!stage.component ? (
-            <div className="text-center py-8">
-              <div className="text-gray-500 mb-4">
-                Select a component for this stage
+            <div className="text-center py-12">
+              <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center">
+                <div className="w-8 h-8 border-2 border-dashed border-gray-400 rounded-lg"></div>
+              </div>
+              <div className="text-gray-600 mb-6 font-medium">
+                Choose a component to get started
               </div>
               <ComponentSelector
                 category={stage.id as any}
@@ -151,31 +171,35 @@ export function PipelineStage({
               />
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-6">
               {/* Selected Component Info */}
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Badge variant="secondary">{stage.component.name}</Badge>
-                    <CostEstimation cost={stage.component.tradeoffs.cost} />
+              <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-white/40">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Badge variant="secondary" className="bg-white/80 text-gray-700 font-semibold px-3 py-1">
+                        {stage.component.name}
+                      </Badge>
+                      <CostEstimation cost={stage.component.tradeoffs.cost} />
+                    </div>
+                    <p className="text-sm text-gray-600 leading-relaxed">
+                      {stage.component.description}
+                    </p>
                   </div>
-                  <p className="text-sm text-gray-600 mb-3">
-                    {stage.component.description}
-                  </p>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onRemoveComponent(stage.id)}
+                    className="text-red-500 hover:text-red-700 hover:bg-red-50/80 transition-colors"
+                  >
+                    Remove
+                  </Button>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onRemoveComponent(stage.id)}
-                  className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                >
-                  Remove
-                </Button>
               </div>
 
               {/* Configuration Form */}
               {isConfiguring && (
-                <div className="border-t pt-4">
+                <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-white/40">
                   <ConfigurationForm
                     component={stage.component}
                     onParameterChange={(parameter, value) => 
@@ -186,20 +210,26 @@ export function PipelineStage({
               )}
 
               {/* Quick Stats */}
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="font-medium text-green-600">Pros:</span>
-                  <ul className="list-disc list-inside text-gray-600 mt-1">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-emerald-50/80 rounded-lg p-3 border border-emerald-100">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                    <span className="font-semibold text-emerald-700 text-sm">Advantages</span>
+                  </div>
+                  <ul className="space-y-1">
                     {stage.component.tradeoffs.pros.slice(0, 2).map((pro, index) => (
-                      <li key={index} className="truncate">{pro}</li>
+                      <li key={index} className="text-xs text-emerald-600 leading-relaxed">{pro}</li>
                     ))}
                   </ul>
                 </div>
-                <div>
-                  <span className="font-medium text-red-600">Cons:</span>
-                  <ul className="list-disc list-inside text-gray-600 mt-1">
+                <div className="bg-amber-50/80 rounded-lg p-3 border border-amber-100">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                    <span className="font-semibold text-amber-700 text-sm">Considerations</span>
+                  </div>
+                  <ul className="space-y-1">
                     {stage.component.tradeoffs.cons.slice(0, 2).map((con, index) => (
-                      <li key={index} className="truncate">{con}</li>
+                      <li key={index} className="text-xs text-amber-600 leading-relaxed">{con}</li>
                     ))}
                   </ul>
                 </div>

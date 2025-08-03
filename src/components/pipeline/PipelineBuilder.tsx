@@ -11,7 +11,7 @@ import { PipelineVisualization } from './PipelineVisualization';
 import { CostEstimation } from './CostEstimation';
 import { PipelineStage as PipelineStageType, ComponentOption, ValidationResult, PipelineConfiguration } from '@/types';
 import { PIPELINE_STAGES } from '@/lib/mock-data';
-import { Save, Play, AlertTriangle, CheckCircle, Settings, Eye } from 'lucide-react';
+import { Save, Play, AlertTriangle, CheckCircle, Settings, Eye, DollarSign } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface PipelineBuilderProps {
@@ -289,57 +289,71 @@ export function PipelineBuilder({
   return (
     <div className={cn("space-y-6", className)}>
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <h2 className="text-2xl font-bold">Pipeline Builder</h2>
-          <Badge variant="outline">
-            {completedStages}/{stages.length} configured
-          </Badge>
-          {overallValidation.isValid ? (
-            <Badge variant="success" className="flex items-center gap-1">
-              <CheckCircle className="h-3 w-3" />
-              Valid
-            </Badge>
-          ) : (
-            <Badge variant="destructive" className="flex items-center gap-1">
-              <AlertTriangle className="h-3 w-3" />
-              {overallValidation.errors.length} error{overallValidation.errors.length !== 1 ? 's' : ''}
-            </Badge>
-          )}
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowVisualization(!showVisualization)}
-          >
-            <Eye className="h-4 w-4 mr-2" />
-            {showVisualization ? 'Hide' : 'Show'} Visualization
-          </Button>
-          <Button
-            variant="outline"
-            onClick={handleSave}
-            disabled={!overallValidation.isValid}
-          >
-            <Save className="h-4 w-4 mr-2" />
-            Save
-          </Button>
-          <Button
-            onClick={handleTest}
-            disabled={!overallValidation.isValid}
-          >
-            <Play className="h-4 w-4 mr-2" />
-            Test Pipeline
-          </Button>
+      <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/40 shadow-sm mb-8">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-1">Pipeline Configuration</h2>
+              <p className="text-gray-600">Configure each stage of your RAG pipeline</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Badge variant="outline" className="bg-white/80 border-gray-200 px-3 py-1 font-semibold">
+                {completedStages}/{stages.length} configured
+              </Badge>
+              {overallValidation.isValid ? (
+                <Badge className="flex items-center gap-2 bg-emerald-100 text-emerald-700 border-emerald-200 px-3 py-1">
+                  <CheckCircle className="h-4 w-4" />
+                  Pipeline Valid
+                </Badge>
+              ) : (
+                <Badge className="flex items-center gap-2 bg-red-100 text-red-700 border-red-200 px-3 py-1">
+                  <AlertTriangle className="h-4 w-4" />
+                  {overallValidation.errors.length} error{overallValidation.errors.length !== 1 ? 's' : ''}
+                </Badge>
+              )}
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowVisualization(!showVisualization)}
+              className="bg-white/60 hover:bg-white/80 border border-gray-200"
+            >
+              <Eye className="h-4 w-4 mr-2" />
+              {showVisualization ? 'Hide' : 'Show'} Visualization
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleSave}
+              disabled={!overallValidation.isValid}
+              className="bg-white/60 hover:bg-white/80 border-gray-200 font-semibold"
+            >
+              <Save className="h-4 w-4 mr-2" />
+              Save Configuration
+            </Button>
+            <Button
+              onClick={handleTest}
+              disabled={!overallValidation.isValid}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg"
+            >
+              <Play className="h-4 w-4 mr-2" />
+              Test Pipeline
+            </Button>
+          </div>
         </div>
       </div>
 
       {/* Cost Summary */}
       {totalCost > 0 && (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Cost Summary</CardTitle>
+        <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200 mb-8">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <DollarSign className="h-5 w-5 text-blue-600" />
+              Cost Summary
+            </CardTitle>
+            <p className="text-gray-600">Estimated monthly costs for your pipeline configuration</p>
           </CardHeader>
           <CardContent>
             <CostEstimation
@@ -372,7 +386,7 @@ export function PipelineBuilder({
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
           {stages.map((stage) => (
             <PipelineStage
               key={stage.id}
@@ -389,20 +403,24 @@ export function PipelineBuilder({
 
       {/* Validation Summary */}
       {(overallValidation.errors.length > 0 || overallValidation.warnings.length > 0) && (
-        <Card>
+        <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 mt-8">
           <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-yellow-500" />
+            <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-600" />
               Validation Issues
             </CardTitle>
+            <p className="text-gray-600">Please resolve these issues before testing your pipeline</p>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-4">
             {overallValidation.errors.length > 0 && (
-              <div>
-                <h4 className="font-medium text-red-700 mb-2">Errors</h4>
-                <ul className="space-y-1">
+              <div className="bg-red-50 rounded-lg p-4 border border-red-200">
+                <h4 className="font-bold text-red-800 mb-3 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                  Errors ({overallValidation.errors.length})
+                </h4>
+                <ul className="space-y-2">
                   {overallValidation.errors.map((error, index) => (
-                    <li key={index} className="text-sm text-red-600 flex items-start gap-2">
+                    <li key={index} className="text-sm text-red-700 flex items-start gap-3 bg-white/60 p-2 rounded">
                       <span className="text-red-500 mt-0.5">•</span>
                       {error}
                     </li>
@@ -412,12 +430,15 @@ export function PipelineBuilder({
             )}
             
             {overallValidation.warnings.length > 0 && (
-              <div>
-                <h4 className="font-medium text-yellow-700 mb-2">Warnings</h4>
-                <ul className="space-y-1">
+              <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
+                <h4 className="font-bold text-amber-800 mb-3 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                  Warnings ({overallValidation.warnings.length})
+                </h4>
+                <ul className="space-y-2">
                   {overallValidation.warnings.map((warning, index) => (
-                    <li key={index} className="text-sm text-yellow-600 flex items-start gap-2">
-                      <span className="text-yellow-500 mt-0.5">•</span>
+                    <li key={index} className="text-sm text-amber-700 flex items-start gap-3 bg-white/60 p-2 rounded">
+                      <span className="text-amber-500 mt-0.5">•</span>
                       {warning}
                     </li>
                   ))}

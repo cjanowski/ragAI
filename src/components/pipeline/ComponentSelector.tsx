@@ -57,80 +57,86 @@ export function ComponentSelector({
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className="w-full justify-between"
+            className="w-full justify-between h-12 bg-white/80 backdrop-blur-sm border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all duration-200 font-medium"
             onClick={() => setIsOpen(!isOpen)}
           >
-            {selectedComponent ? selectedComponent.name : `Select ${category} component`}
-            <ChevronDown className="h-4 w-4" />
+            <span className="text-gray-700">
+              {selectedComponent ? selectedComponent.name : `Choose ${category} component`}
+            </span>
+            <ChevronDown className="h-4 w-4 text-gray-500" />
           </Button>
         </PopoverTrigger>
         
-        <PopoverContent className="w-96 p-0" align="start">
-          <div className="max-h-96 overflow-y-auto">
-            <div className="p-3 border-b">
-              <h4 className="font-semibold text-sm">
+        <PopoverContent className="w-[480px] p-0 bg-white/95 backdrop-blur-sm border-gray-200 shadow-xl" align="start">
+          <div className="max-h-[500px] overflow-y-auto">
+            <div className="p-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
+              <h4 className="font-bold text-gray-900 mb-1">
                 Choose {category.charAt(0).toUpperCase() + category.slice(1)} Component
               </h4>
-              <p className="text-xs text-gray-500 mt-1">
-                Select the best component for your use case
+              <p className="text-sm text-gray-600">
+                Select the best component for your specific use case and requirements
               </p>
             </div>
             
-            <div className="p-2 space-y-2">
+            <div className="p-3 space-y-3">
               {components.map((component) => (
                 <div key={component.id} className="relative">
                   <Card 
                     className={cn(
-                      "cursor-pointer transition-all duration-200 hover:shadow-md",
-                      selectedComponent?.id === component.id && "ring-2 ring-blue-500"
+                      "cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-[1.02] border-gray-200 bg-white/80 backdrop-blur-sm",
+                      selectedComponent?.id === component.id && "ring-2 ring-blue-400 shadow-lg scale-[1.02] bg-blue-50/80"
                     )}
                     onClick={() => handleSelect(component)}
                   >
-                    <CardHeader className="pb-2">
+                    <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <CardTitle className="text-sm font-medium">
+                          <CardTitle className="text-base font-bold text-gray-900 mb-1">
                             {component.name}
                           </CardTitle>
-                          <CardDescription className="text-xs mt-1 line-clamp-2">
+                          <CardDescription className="text-sm text-gray-600 leading-relaxed line-clamp-2">
                             {component.description}
                           </CardDescription>
                         </div>
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-6 w-6 p-0 ml-2"
+                          className="h-8 w-8 p-0 ml-3 hover:bg-blue-100 transition-colors"
                           onClick={(e) => {
                             e.stopPropagation();
                             setSelectedForDetails(component);
                           }}
                         >
-                          <Info className="h-3 w-3" />
+                          <Info className="h-4 w-4 text-blue-600" />
                         </Button>
                       </div>
                     </CardHeader>
                     
                     <CardContent className="pt-0">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="text-xs">
+                        <div className="flex items-center gap-3">
+                          <Badge variant="outline" className="text-xs bg-gray-50 border-gray-200 font-medium">
                             {component.parameters.length} params
                           </Badge>
-                          <span className={cn("text-xs font-medium", getCostColor(component.tradeoffs.cost))}>
-                            {formatCost(component.tradeoffs.cost)}
-                          </span>
+                          <div className={cn("text-sm font-bold px-2 py-1 rounded-md", getCostColor(component.tradeoffs.cost))}>
+                            ${formatCost(component.tradeoffs.cost)}
+                          </div>
                         </div>
                         
                         {/* Quick indicators */}
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-2">
                           {component.tradeoffs.cost.perOperation === 0 && component.tradeoffs.cost.monthly === 0 && (
-                            <Badge variant="success" className="text-xs px-1 py-0">Free</Badge>
+                            <Badge className="text-xs px-2 py-1 bg-emerald-100 text-emerald-700 border-emerald-200">Free</Badge>
                           )}
                           {component.tradeoffs.pros.some(pro => pro.toLowerCase().includes('fast')) && (
-                            <Zap className="h-3 w-3 text-yellow-500" />
+                            <div className="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center">
+                              <Zap className="h-3 w-3 text-amber-600" />
+                            </div>
                           )}
                           {component.tradeoffs.pros.some(pro => pro.toLowerCase().includes('secure') || pro.toLowerCase().includes('privacy')) && (
-                            <Shield className="h-3 w-3 text-green-500" />
+                            <div className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center">
+                              <Shield className="h-3 w-3 text-emerald-600" />
+                            </div>
                           )}
                         </div>
                       </div>

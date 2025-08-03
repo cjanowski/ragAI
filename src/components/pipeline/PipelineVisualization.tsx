@@ -191,20 +191,29 @@ export function PipelineVisualization({
   };
 
   return (
-    <Card className={cn("w-full", className)}>
-      <CardHeader>
+    <Card className={cn("w-full bg-gradient-to-br from-white to-gray-50 border-gray-200 shadow-lg", className)}>
+      <CardHeader className="bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-gray-200">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <CardTitle className="text-lg">Pipeline Visualization</CardTitle>
-            <Badge variant="outline">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
+                <Eye className="h-4 w-4 text-white" />
+              </div>
+              <CardTitle className="text-xl font-bold text-gray-900">Pipeline Flow</CardTitle>
+            </div>
+            <Badge variant="outline" className="bg-white/80 border-gray-200 px-3 py-1 font-semibold">
               {completedStages}/{totalStages} configured
             </Badge>
             {showValidation && (
               <Badge 
-                variant={overallValidation.isValid ? "success" : "destructive"}
-                className="text-xs"
+                className={cn(
+                  "px-3 py-1 font-semibold",
+                  overallValidation.isValid 
+                    ? "bg-emerald-100 text-emerald-700 border-emerald-200" 
+                    : "bg-red-100 text-red-700 border-red-200"
+                )}
               >
-                {overallValidation.isValid ? 'Valid' : 'Invalid'}
+                {overallValidation.isValid ? 'Valid Pipeline' : 'Invalid Pipeline'}
               </Badge>
             )}
           </div>
