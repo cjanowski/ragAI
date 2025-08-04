@@ -1,16 +1,75 @@
 "use client";
 
 import React from 'react';
-import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ComponentSelector } from './ComponentSelector';
 import { ConfigurationForm } from './ConfigurationForm';
 import { CostEstimation } from './CostEstimation';
-import { PipelineStage as PipelineStageType, ComponentOption, ValidationResult } from '@/types';
+import { EmbeddingConfiguration } from './EmbeddingConfiguration';
+import { ChunkingConfiguration } from './ChunkingConfiguration';
+import { PipelineStage as PipelineStageType, ComponentOption, ValidationResult, EmbeddingConfig, ChunkingConfig } from '@/types';
 import { Settings, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+// Helper functions to convert between component options and config objects
+function convertComponentToEmbeddingConfig(component: ComponentOption): EmbeddingConfig {
+  const apiKeyParam = component.parameters.find(p => p.name === 'apiKey');
+  const maxTokensParam = component.parameters.find(p => p.name === 'maxTokens');
+  const batchSizeParam = component.parameters.find(p => p.name === 'batchSize');
+  const dimensionsParam = component.parameters.find(p => p.name === 'dimensions');
+  
+  return {
+    provider: component.id.includes('openai') ? 'OpenAI' : 
+              component.id.includes('cohere') ? 'Cohere' :
+              component.id.includes('voyage') ? 'Voyage AI' : 'Self-Hosted',
+    model: component.id,
+    dimensions: dimensionsParam ? parseInt(dimensionsParam.defaultValue) : 1536,
+    maxTokens: maxTokensParam?.defaultValue || 8191,
+    batchSize: batchSizeParam?.defaultValue || 32,
+    apiKey: apiKeyParam?.defaultValue || '',
+    parameters: component.parameters.reduce((acc, param) => {
+      acc[param.name] = param.defaultValue;
+      return acc;
+    }, {} as Record<string, any>)
+  };
+}
+
+function convertComponentToChunkingConfig(component: ComponentOption): ChunkingConfig {
+  const chunkSizeParam = component.parameters.find(p => p.name === 'chunkSize');
+  const chunkOverlapParam = component.parameters.find(p => p.name === 'chunkOverlap');
+  const preserveStructureParam = component.parameters.find(p => p.name === 'preserveStructure');
+  
+  return {
+    strategy: component.id.includes('fixed') ? 'fixed' :
+              component.id.includes('recursive') ? 'recursive' :
+              component.id.includes('semantic') ? 'semantic' :
+              component.id.includes('document') ? 'document' :
+              component.id.includes('agentic') ? 'agentic' : 'recursive',
+    chunkSize: chunkSizeParam?.defaultValue || 1000,
+    chunkOverlap: chunkOverlapParam?.defaultValue || 200,
+    preserveStructure: preserveStructureParam?.defaultValue || true,
+    parameters: component.parameters.reduce((acc, param) => {
+      acc[param.name] = param.defaultValue;
+      return acc;
+    }, {} as Record<string, any>)
+  };
+}
+
+function getChunkingConfigFromStages(stages?: PipelineStageType[]): ChunkingConfig | undefined {
+  if (!stages) return undefined;
+  const chunkingStage = stages.find(s => s.id === 'chunking');
+  if (!chunkingStage?.component) return undefined;
+  return convertComponentToChunkingConfig(chunkingStage.component);
+}
+
+function getEmbeddingConfigFromStages(stages?: PipelineStageType[]): EmbeddingConfig | undefined {
+  if (!stages) return undefined;
+  const embeddingStage = stages.find(s => s.id === 'embedding');
+  if (!embeddingStage?.component) return undefined;
+  return convertComponentToEmbeddingConfig(embeddingStage.component);
+}
 
 interface PipelineStageProps {
   stage: PipelineStageType;
@@ -19,6 +78,8 @@ interface PipelineStageProps {
   onRemoveComponent: (stageId: string) => void;
   isConfiguring: boolean;
   onToggleConfiguration: (stageId: string) => void;
+  onConfigChange?: (stageId: string, config: any) => void;
+  allStages?: PipelineStageType[];
   className?: string;
 }
 
@@ -29,36 +90,14 @@ export function PipelineStage({
   onRemoveComponent,
   isConfiguring,
   onToggleConfiguration,
+  onConfigChange,
+  allStages,
   className
 }: PipelineStageProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef: setDraggableRef,
-    transform,
-    isDragging,
-  } = useDraggable({
-    id: stage.id,
-    data: {
-      type: 'stage',
-      stage,
-    },
-  });
-
-  const {
-    isOver,
-    setNodeRef: setDroppableRef,
-  } = useDroppable({
-    id: stage.id,
-    data: {
-      type: 'stage',
-      accepts: ['component'],
-    },
-  });
-
-  const style = transform ? {
-    transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-  } : undefined;
+  // Temporarily disable drag and drop to focus on core functionality
+  const isDragging = false;
+  const isOver = false;
+  const style = undefined;
 
   const getValidationIcon = (validation: ValidationResult) => {
     if (!validation.isValid && validation.errors.length > 0) {
@@ -80,19 +119,12 @@ export function PipelineStage({
 
   return (
     <div
-      ref={(node) => {
-        setDraggableRef(node);
-        setDroppableRef(node);
-      }}
-      style={style}
       className={cn(
         "relative transition-all duration-200",
         isDragging && "opacity-50 scale-105 z-50",
         isOver && "ring-2 ring-blue-500 ring-opacity-50",
         className
       )}
-      {...attributes}
-      {...listeners}
     >
       <Card className={cn(
         "w-full min-h-[280px] transition-all duration-300 hover:shadow-lg group relative overflow-hidden",
@@ -128,8 +160,15 @@ export function PipelineStage({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => onToggleConfiguration(stage.id)}
-                  className="h-9 w-9 p-0 hover:bg-white/80 transition-colors"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Settings button clicked for stage:', stage.id);
+                    onToggleConfiguration(stage.id);
+                  }}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onTouchStart={(e) => e.stopPropagation()}
+                  className="h-9 w-9 p-0 hover:bg-white/80 transition-colors z-10 relative"
                 >
                   <Settings className="h-4 w-4" />
                 </Button>
@@ -189,8 +228,15 @@ export function PipelineStage({
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => onRemoveComponent(stage.id)}
-                    className="text-red-500 hover:text-red-700 hover:bg-red-50/80 transition-colors"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log('Remove button clicked for stage:', stage.id);
+                      onRemoveComponent(stage.id);
+                    }}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onTouchStart={(e) => e.stopPropagation()}
+                    className="text-red-500 hover:text-red-700 hover:bg-red-50/80 transition-colors z-10 relative"
                   >
                     Remove
                   </Button>
@@ -200,12 +246,26 @@ export function PipelineStage({
               {/* Configuration Form */}
               {isConfiguring && (
                 <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-white/40">
-                  <ConfigurationForm
-                    component={stage.component}
-                    onParameterChange={(parameter, value) => 
-                      onParameterChange(stage.id, parameter, value)
-                    }
-                  />
+                  {stage.id === 'embedding' ? (
+                    <EmbeddingConfiguration
+                      config={convertComponentToEmbeddingConfig(stage.component)}
+                      chunkingConfig={getChunkingConfigFromStages(allStages)}
+                      onConfigChange={(config) => onConfigChange?.(stage.id, config)}
+                    />
+                  ) : stage.id === 'chunking' ? (
+                    <ChunkingConfiguration
+                      config={convertComponentToChunkingConfig(stage.component)}
+                      embeddingConfig={getEmbeddingConfigFromStages(allStages)}
+                      onConfigChange={(config) => onConfigChange?.(stage.id, config)}
+                    />
+                  ) : (
+                    <ConfigurationForm
+                      component={stage.component}
+                      onParameterChange={(parameter, value) => 
+                        onParameterChange(stage.id, parameter, value)
+                      }
+                    />
+                  )}
                 </div>
               )}
 

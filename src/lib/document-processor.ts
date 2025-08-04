@@ -312,8 +312,10 @@ export class DocumentProcessor {
       const plainText = htmlToText(text, {
         wordwrap: false,
         preserveNewlines: true,
-        ignoreHref: true,
-        ignoreImage: true
+        selectors: [
+          { selector: 'a', options: { ignoreHref: true } },
+          { selector: 'img', options: { ignoreHref: true } }
+        ]
       });
 
       return {

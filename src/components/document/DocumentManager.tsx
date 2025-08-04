@@ -448,7 +448,7 @@ export function DocumentManager({
                 <Eye className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No Document Selected</h3>
                 <p className="text-gray-500">
-                  Upload and process a document, then click "View" to see the preview here.
+                  Upload and process a document, then click &quot;View&quot; to see the preview here.
                 </p>
               </CardContent>
             </Card>

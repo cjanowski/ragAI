@@ -1,4 +1,5 @@
 import { ComponentOption } from '@/types';
+import { generateEmbeddingComponentOptions } from './embedding-models';
 
 export const MOCK_COMPONENT_OPTIONS: ComponentOption[] = [
   // Ingestion Components
@@ -85,12 +86,91 @@ export const MOCK_COMPONENT_OPTIONS: ComponentOption[] = [
       }
     ],
     tradeoffs: {
-      pros: ['Predictable chunk sizes', 'Fast processing', 'Simple to understand'],
-      cons: ['May break semantic units', 'Context boundaries ignored'],
-      useCases: ['General purpose', 'Large documents', 'Quick prototyping'],
+      pros: ['Predictable chunk sizes', 'Fast processing', 'Simple to understand', 'Memory efficient'],
+      cons: ['May break semantic units', 'Context boundaries ignored', 'Poor for structured content'],
+      useCases: ['General purpose', 'Large documents', 'Quick prototyping', 'Memory-constrained environments'],
       cost: {
         setup: 0,
         perOperation: 0.0001,
+        monthly: 0,
+        currency: 'USD'
+      }
+    }
+  },
+  {
+    id: 'recursive-chunking',
+    name: 'Recursive Chunking',
+    description: 'Recursively split text using multiple separators (paragraphs, sentences, words)',
+    category: 'chunking',
+    parameters: [
+      {
+        name: 'chunkSize',
+        type: 'number',
+        required: true,
+        defaultValue: 1000,
+        validation: { min: 100, max: 8000 }
+      },
+      {
+        name: 'chunkOverlap',
+        type: 'number',
+        required: true,
+        defaultValue: 200,
+        validation: { min: 0, max: 1000 }
+      },
+      {
+        name: 'separators',
+        type: 'multiselect',
+        required: false,
+        defaultValue: ['\n\n', '\n', '. ', ' '],
+        options: ['\n\n', '\n', '. ', ' ', '!', '?']
+      }
+    ],
+    tradeoffs: {
+      pros: ['Respects document structure', 'Better context preservation', 'Configurable separators', 'Good balance'],
+      cons: ['More complex than fixed', 'Variable chunk sizes', 'Requires separator tuning'],
+      useCases: ['Structured documents', 'Mixed content types', 'Production systems', 'Most common choice'],
+      cost: {
+        setup: 0,
+        perOperation: 0.0002,
+        monthly: 0,
+        currency: 'USD'
+      }
+    }
+  },
+  {
+    id: 'document-chunking',
+    name: 'Document-Based Chunking',
+    description: 'Split based on document structure (headers, sections, pages)',
+    category: 'chunking',
+    parameters: [
+      {
+        name: 'chunkSize',
+        type: 'number',
+        required: true,
+        defaultValue: 2000,
+        validation: { min: 500, max: 8000 }
+      },
+      {
+        name: 'preserveStructure',
+        type: 'boolean',
+        required: false,
+        defaultValue: true
+      },
+      {
+        name: 'headerLevels',
+        type: 'multiselect',
+        required: false,
+        defaultValue: ['h1', 'h2', 'h3'],
+        options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
+      }
+    ],
+    tradeoffs: {
+      pros: ['Preserves document hierarchy', 'Natural boundaries', 'Context-aware', 'Good for navigation'],
+      cons: ['Requires structured input', 'Variable chunk sizes', 'May create large chunks'],
+      useCases: ['Technical documentation', 'Academic papers', 'Structured reports', 'Hierarchical content'],
+      cost: {
+        setup: 0,
+        perOperation: 0.0003,
         monthly: 0,
         currency: 'USD'
       }
@@ -115,12 +195,19 @@ export const MOCK_COMPONENT_OPTIONS: ComponentOption[] = [
         required: true,
         defaultValue: 2000,
         validation: { min: 500, max: 8000 }
+      },
+      {
+        name: 'embeddingModel',
+        type: 'select',
+        required: false,
+        defaultValue: 'sentence-transformers/all-MiniLM-L6-v2',
+        options: ['sentence-transformers/all-MiniLM-L6-v2', 'openai/text-embedding-ada-002']
       }
     ],
     tradeoffs: {
-      pros: ['Preserves semantic coherence', 'Better context boundaries', 'Improved retrieval'],
-      cons: ['Slower processing', 'Requires embeddings', 'Variable chunk sizes'],
-      useCases: ['Academic papers', 'Technical docs', 'Narrative content'],
+      pros: ['Preserves semantic coherence', 'Better context boundaries', 'Improved retrieval', 'Content-aware'],
+      cons: ['Slower processing', 'Requires embeddings', 'Variable chunk sizes', 'Higher cost'],
+      useCases: ['Academic papers', 'Technical docs', 'Narrative content', 'High-quality retrieval'],
       cost: {
         setup: 0,
         perOperation: 0.002,
@@ -129,66 +216,49 @@ export const MOCK_COMPONENT_OPTIONS: ComponentOption[] = [
       }
     }
   },
-
-  // Embedding Components
   {
-    id: 'openai-ada-002',
-    name: 'OpenAI text-embedding-ada-002',
-    description: 'OpenAI\'s most capable embedding model with 1536 dimensions',
-    category: 'embedding',
+    id: 'agentic-chunking',
+    name: 'Agentic Chunking',
+    description: 'AI-powered chunking that understands content and creates optimal boundaries',
+    category: 'chunking',
     parameters: [
       {
-        name: 'apiKey',
-        type: 'string',
+        name: 'maxChunkSize',
+        type: 'number',
         required: true,
-        defaultValue: ''
+        defaultValue: 2000,
+        validation: { min: 500, max: 8000 }
       },
       {
-        name: 'batchSize',
+        name: 'llmModel',
+        type: 'select',
+        required: true,
+        defaultValue: 'gpt-3.5-turbo',
+        options: ['gpt-3.5-turbo', 'gpt-4', 'claude-3-sonnet']
+      },
+      {
+        name: 'qualityThreshold',
         type: 'number',
         required: false,
-        defaultValue: 100,
-        validation: { min: 1, max: 2048 }
+        defaultValue: 0.9,
+        validation: { min: 0.5, max: 1.0 }
       }
     ],
     tradeoffs: {
-      pros: ['High quality embeddings', 'Well-tested', 'Good performance'],
-      cons: ['API costs', 'Rate limits', 'External dependency'],
-      useCases: ['Production systems', 'High accuracy needs', 'General purpose'],
+      pros: ['Highest quality boundaries', 'Content understanding', 'Adaptive to content type', 'Best retrieval'],
+      cons: ['Slowest processing', 'Highest cost', 'Requires LLM calls', 'Complex setup'],
+      useCases: ['Premium applications', 'Complex documents', 'Research systems', 'Maximum quality needs'],
       cost: {
         setup: 0,
-        perOperation: 0.0001,
+        perOperation: 0.01,
         monthly: 0,
         currency: 'USD'
       }
     }
   },
-  {
-    id: 'sentence-transformers',
-    name: 'Sentence Transformers',
-    description: 'Open-source embedding models running locally',
-    category: 'embedding',
-    parameters: [
-      {
-        name: 'modelName',
-        type: 'select',
-        required: true,
-        defaultValue: 'all-MiniLM-L6-v2',
-        options: ['all-MiniLM-L6-v2', 'all-mpnet-base-v2', 'multi-qa-MiniLM-L6-cos-v1']
-      }
-    ],
-    tradeoffs: {
-      pros: ['No API costs', 'Privacy', 'No rate limits'],
-      cons: ['Requires local compute', 'Model management', 'Potentially lower quality'],
-      useCases: ['Privacy-sensitive data', 'Cost optimization', 'Offline systems'],
-      cost: {
-        setup: 50,
-        perOperation: 0,
-        monthly: 20,
-        currency: 'USD'
-      }
-    }
-  },
+
+  // Embedding Components - Generated from embedding-models.ts
+  ...generateEmbeddingComponentOptions(),
 
   // Vector Store Components
   {
@@ -336,9 +406,9 @@ export const MOCK_COMPONENT_OPTIONS: ComponentOption[] = [
 
   // Generation Components
   {
-    id: 'gpt-4',
-    name: 'GPT-4',
-    description: 'OpenAI\'s most capable language model for high-quality responses',
+    id: 'gemini-1.5-pro',
+    name: 'Gemini 1.5 Pro',
+    description: 'Google\'s most capable model for complex reasoning with 2M token context window',
     category: 'generation',
     parameters: [
       {
@@ -359,25 +429,31 @@ export const MOCK_COMPONENT_OPTIONS: ComponentOption[] = [
         type: 'number',
         required: false,
         defaultValue: 1000,
-        validation: { min: 1, max: 4000 }
+        validation: { min: 1, max: 8192 }
+      },
+      {
+        name: 'systemPrompt',
+        type: 'string',
+        required: false,
+        defaultValue: 'You are a helpful AI assistant.'
       }
     ],
     tradeoffs: {
-      pros: ['Highest quality', 'Strong reasoning', 'Follows instructions well'],
-      cons: ['Most expensive', 'Slower responses', 'Rate limits'],
-      useCases: ['Complex reasoning', 'High-quality content', 'Critical applications'],
+      pros: ['Largest context window (2M tokens)', 'Multimodal capabilities', 'Strong reasoning', 'Code generation'],
+      cons: ['Higher cost', 'Rate limits', 'Requires API key'],
+      useCases: ['Long document analysis', 'Complex reasoning', 'Multimodal tasks', 'Code generation'],
       cost: {
         setup: 0,
-        perOperation: 0.03,
+        perOperation: 0.0125,
         monthly: 0,
         currency: 'USD'
       }
     }
   },
   {
-    id: 'claude-3-sonnet',
-    name: 'Claude 3 Sonnet',
-    description: 'Anthropic\'s balanced model with good performance and cost efficiency',
+    id: 'gemini-1.5-flash',
+    name: 'Gemini 1.5 Flash',
+    description: 'Google\'s fast and efficient model with 1M token context window',
     category: 'generation',
     parameters: [
       {
@@ -391,23 +467,74 @@ export const MOCK_COMPONENT_OPTIONS: ComponentOption[] = [
         type: 'number',
         required: false,
         defaultValue: 0.1,
-        validation: { min: 0, max: 1 }
+        validation: { min: 0, max: 2 }
       },
       {
         name: 'maxTokens',
         type: 'number',
         required: false,
         defaultValue: 1000,
-        validation: { min: 1, max: 4000 }
+        validation: { min: 1, max: 8192 }
+      },
+      {
+        name: 'systemPrompt',
+        type: 'string',
+        required: false,
+        defaultValue: 'You are a helpful AI assistant.'
       }
     ],
     tradeoffs: {
-      pros: ['Good balance of quality/cost', 'Fast responses', 'Strong safety'],
-      cons: ['Less capable than GPT-4', 'Newer ecosystem', 'Limited availability'],
-      useCases: ['Production systems', 'Cost-conscious applications', 'Safe AI needs'],
+      pros: ['Very fast responses', 'Cost effective', 'Large context (1M tokens)', 'Multimodal'],
+      cons: ['Less capable than Pro', 'Rate limits', 'Requires API key'],
+      useCases: ['Production systems', 'Real-time applications', 'Cost-conscious deployments'],
       cost: {
         setup: 0,
-        perOperation: 0.015,
+        perOperation: 0.00075,
+        monthly: 0,
+        currency: 'USD'
+      }
+    }
+  },
+  {
+    id: 'gemini-1.5-flash-8b',
+    name: 'Gemini 1.5 Flash 8B',
+    description: 'Google\'s smallest and fastest model for simple tasks',
+    category: 'generation',
+    parameters: [
+      {
+        name: 'apiKey',
+        type: 'string',
+        required: true,
+        defaultValue: ''
+      },
+      {
+        name: 'temperature',
+        type: 'number',
+        required: false,
+        defaultValue: 0.1,
+        validation: { min: 0, max: 2 }
+      },
+      {
+        name: 'maxTokens',
+        type: 'number',
+        required: false,
+        defaultValue: 1000,
+        validation: { min: 1, max: 8192 }
+      },
+      {
+        name: 'systemPrompt',
+        type: 'string',
+        required: false,
+        defaultValue: 'You are a helpful AI assistant.'
+      }
+    ],
+    tradeoffs: {
+      pros: ['Fastest responses', 'Lowest cost', 'Large context (1M tokens)', 'Efficient'],
+      cons: ['Least capable', 'Text only', 'Rate limits'],
+      useCases: ['Simple Q&A', 'High-volume applications', 'Budget-conscious projects'],
+      cost: {
+        setup: 0,
+        perOperation: 0.000375,
         monthly: 0,
         currency: 'USD'
       }

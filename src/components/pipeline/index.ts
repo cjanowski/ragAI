@@ -4,3 +4,7 @@ export { ComponentSelector } from './ComponentSelector';
 export { ConfigurationForm } from './ConfigurationForm';
 export { CostEstimation } from './CostEstimation';
 export { PipelineVisualization } from './PipelineVisualization';
+export { ChunkingConfiguration } from './ChunkingConfiguration';
+export { ChunkingStrategyComparison } from './ChunkingStrategyComparison';
+export { ChunkingPreview } from './ChunkingPreview';
+export { EmbeddingConfiguration } from './EmbeddingConfiguration';

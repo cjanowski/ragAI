@@ -263,7 +263,7 @@ export function CleaningOptionsComponent({
                 <div className="mt-2 p-3 bg-blue-50 rounded-md text-sm font-mono max-h-40 overflow-y-auto">
                   {/* This would be populated by the preview function */}
                   <span className="text-gray-500 italic">
-                    Click "Show Preview" to see cleaned text
+                    Click &quot;Show Preview&quot; to see cleaned text
                   </span>
                 </div>
               </div>
