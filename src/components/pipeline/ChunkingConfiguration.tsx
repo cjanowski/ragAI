@@ -123,7 +123,7 @@ export function ChunkingConfiguration({
             <CardContent className="pt-0">
               <p className="text-sm text-amber-700">
                 Your chunk size (~{getTokenEstimate(config.chunkSize)} tokens) may exceed the 
-                embedding model's maximum token limit ({embeddingConfig.maxTokens} tokens). 
+                embedding model&apos;s maximum token limit ({embeddingConfig.maxTokens} tokens). 
                 Consider reducing the chunk size to {Math.floor(embeddingConfig.maxTokens * 0.75 * 4)} characters or less.
               </p>
             </CardContent>
