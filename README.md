@@ -20,48 +20,6 @@ A sophisticated web application that enables developers to design, configure, ev
 - **Storage**: Vercel Blob, KV, and Postgres
 - **UI Components**: Shadcn/ui component library
 
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18+ 
-- npm or yarn
-- API keys for LLM providers (OpenAI, Anthropic, Google)
-
-### Installation
-
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd vercel-rag-configurator
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Set up environment variables:
-```bash
-cp .env.example .env.local
-```
-
-Edit `.env.local` with your API keys and configuration.
-
-4. Run the development server:
-```bash
-npm run dev
-```
-
-5. Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-### Build for Production
-
-```bash
-npm run build
-npm start
-```
-
 ## Project Structure
 
 ```
@@ -78,15 +36,6 @@ src/
 └── types/              # TypeScript type definitions
     └── index.ts        # Core pipeline types
 ```
-
-## Environment Variables
-
-See `.env.example` for all required environment variables including:
-
-- LLM provider API keys (OpenAI, Anthropic, Google)
-- Vercel storage tokens
-- Vector database configurations
-- Embedding provider keys
 
 ## Development
 
